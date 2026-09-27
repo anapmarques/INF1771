@@ -105,6 +105,7 @@ def run_genetic_algorithm(
     generations=120,
     mutation_rate=0.12,
     seed=None,
+    on_generation=None,
 ) -> GAResult:
     if population_size < 4 or generations < 1 or not 0 <= mutation_rate <= 1:
         raise ValueError("Invalid genetic algorithm parameters")
@@ -122,7 +123,7 @@ def run_genetic_algorithm(
         candidates = rng.sample(population, 3)
         return min(candidates, key=lambda item: evaluation(item).cost)
 
-    for _ in range(generations):
+    for generation in range(1, generations + 1):
         population.sort(key=lambda item: evaluation(item).cost)
         next_population = [population[0][:], population[1][:]]
         while len(next_population) < population_size:
@@ -134,6 +135,11 @@ def run_genetic_algorithm(
                 child[gym] ^= 1 << rng.randrange(len(POKEMON))
             next_population.append(repair_solution(child, rng))
         population = next_population
+        if on_generation is not None:
+            costs = [evaluation(item).cost for item in population]
+            finite = [cost for cost in costs if cost < inf]
+            mean_cost = sum(finite) / len(finite) if finite else inf
+            on_generation(generation, costs[0], mean_cost, population[0][:])
 
     best = min(population, key=lambda item: evaluation(item).cost)
     result = evaluation(best)

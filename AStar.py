@@ -29,7 +29,7 @@ def manhattan(a: Position, b: Position) -> int:
     return abs(a[0] - b[0]) + abs(a[1] - b[1])
 
 
-def astar(grid: list[list[str]], start: Position, goal: Position) -> AStarResult:
+def astar(grid: list[list[str]], start: Position, goal: Position, observer=None) -> AStarResult:
     if start == goal:
         return AStarResult(0, [start], 0, set())
 
@@ -49,9 +49,13 @@ def astar(grid: list[list[str]], start: Position, goal: Position) -> AStarResult
                 current = parent[current]
                 path.append(current)
             path.reverse()
+            if observer is not None:
+                observer("goal", current)
             return AStarResult(cost, path, len(visited), visited)
 
         visited.add(current)
+        if observer is not None:
+            observer("expand", current)
         for dr, dc in MOVES:
             neighbor = current[0] + dr, current[1] + dc
             row, col = neighbor
@@ -65,5 +69,7 @@ def astar(grid: list[list[str]], start: Position, goal: Position) -> AStarResult
                     queue,
                     (new_cost + manhattan(neighbor, goal), new_cost, next(serial), neighbor),
                 )
+                if observer is not None:
+                    observer("push", neighbor)
 
     raise ValueError(f"No path exists between {start} and {goal}")

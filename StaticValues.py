@@ -30,3 +30,16 @@ POKEMON_POWER = {
 
 INITIAL_ENERGY = 6
 SPECIAL_SYMBOLS = set(GYMS) | {START_SYMBOL, DESTINATION_SYMBOL}
+
+SPECIAL_ORDER = (START_SYMBOL, *GYMS, DESTINATION_SYMBOL)
+SYMBOL_NUMBERS = {symbol: number for number, symbol in enumerate(SPECIAL_ORDER, 1)}
+NUMBER_SYMBOLS = {number: symbol for symbol, number in SYMBOL_NUMBERS.items()}
+
+
+def symbol_number(symbol: str) -> int | None:
+    return SYMBOL_NUMBERS.get(symbol)
+
+
+def symbol_label(symbol: str) -> str:
+    number = SYMBOL_NUMBERS.get(symbol)
+    return f"{number:02d}" if number is not None else symbol
