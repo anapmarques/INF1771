@@ -1,4 +1,7 @@
 import unittest
+from itertools import permutations
+from random import Random
+from unittest.mock import patch
 
 from MapRead import find_special_positions, load_map, validate_map
 from RouteCalculation import (
@@ -10,6 +13,30 @@ from StaticValues import DESTINATION_SYMBOL, GYMS, START_SYMBOL
 
 
 class RouteTests(unittest.TestCase):
+    def test_matches_brute_force_with_cache_eviction(self):
+        rng = Random(1771)
+        for size in range(7):
+            gyms = tuple("ABCDEF"[:size])
+            nodes = ("1", *gyms, "U")
+            for trial in range(5):
+                matrix = {node: {node: 0} for node in nodes}
+                for index, source in enumerate(nodes):
+                    for target in nodes[index + 1:]:
+                        matrix[source][target] = matrix[target][source] = rng.randint(1, 50)
+                expected = min(
+                    sum(matrix[a][b] for a, b in zip(order, order[1:]))
+                    for visit in permutations(gyms)
+                    for order in [("1", *visit, "U")]
+                )
+                with self.subTest(size=size, trial=trial), patch("RouteCalculation.MST_CACHE_LIMIT", 2):
+                    result = find_global_route(matrix, gyms=gyms)
+                    self.assertEqual(expected, result.cost)
+                    self.assertEqual(expected, sum(
+                        matrix[a][b] for a, b in zip(result.order, result.order[1:])
+                    ))
+                    self.assertEqual(sorted(gyms), sorted(result.order[1:-1]))
+                    self.assertTrue(result.optimal)
+
     def test_visits_every_gym_before_destination(self):
         matrix = {
             "1": {"A": 1, "B": 5, "U": 9},
@@ -43,7 +70,9 @@ class RouteTests(unittest.TestCase):
             "C": {"1": 3, "A": 9, "B": 1, "U": 1},
             "U": {"1": 4, "A": 9, "B": 9, "C": 1},
         }
-        result = find_global_route(matrix, gyms=("A", "B", "C"))
+        # A tight MST bound must prune before accessing degree-bound adjacency.
+        with patch("RouteCalculation.sorted_adjacency", return_value={}):
+            result = find_global_route(matrix, gyms=("A", "B", "C"))
         self.assertEqual(4, result.cost)
         self.assertEqual(0, result.expanded_states)
         self.assertTrue(result.optimal)

@@ -1,4 +1,5 @@
 from dataclasses import dataclass
+from functools import lru_cache
 from heapq import heappop, heappush
 from itertools import count
 from math import inf
@@ -168,21 +169,14 @@ def find_global_route(
     adjacency = sorted_adjacency(
         [start, *gyms, destination], distance_matrix
     )
-    mst_cache: dict[int, float] = {}
-
+    @lru_cache(maxsize=MST_CACHE_LIMIT)
     def mst_cost(mask: int) -> float:
-        cached = mst_cache.get(mask)
-        if cached is None:
-            cached = calculate_mst_cost(
-                [gyms[index] for index in range(len(gyms)) if mask & (1 << index)],
-                distance_matrix,
-            )
-            if len(mst_cache) >= MST_CACHE_LIMIT:
-                mst_cache.clear()
-            mst_cache[mask] = cached
-        return cached
+        return calculate_mst_cost(
+            [gyms[index] for index in range(len(gyms)) if mask & (1 << index)],
+            distance_matrix,
+        )
 
-    def heuristic(current: str, mask: int) -> float:
+    def heuristic(current: str, mask: int, cost: float = 0.0) -> float:
         remaining_mask = all_mask ^ mask
         if not remaining_mask:
             return distance_matrix[current][destination]
@@ -195,6 +189,8 @@ def find_global_route(
             + mst_cost(remaining_mask)
             + min(distance_matrix[gym][destination] for gym in remaining)
         )
+        if cost + mst_bound >= best_cost:
+            return mst_bound
 
         vertices = set(remaining)
         vertices.add(current)
@@ -266,7 +262,7 @@ def find_global_route(
             new_state = target, mask | bit
             new_cost = cost + distance_matrix[current][target]
             if new_cost < costs.get(new_state, inf):
-                estimate = new_cost + heuristic(*new_state)
+                estimate = new_cost + heuristic(*new_state, new_cost)
                 if estimate >= best_cost:
                     remaining_mask ^= bit
                     continue
