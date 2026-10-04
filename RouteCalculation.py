@@ -141,7 +141,7 @@ def _initial_route(distance_matrix, gyms, start, destination):
     remaining = set(gyms)
     order = [start]
     while remaining:
-        target = min(remaining, key=lambda gym: distance_matrix[order[-1]][gym])
+        target = min(remaining, key=lambda gym: (distance_matrix[order[-1]][gym], gym))
         order.append(target)
         remaining.remove(target)
     order.append(destination)

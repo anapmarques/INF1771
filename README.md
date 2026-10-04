@@ -87,7 +87,7 @@ whether it is running or paused. Nothing has to be clicked to make it move.
 
 - [x] Make the exact global A* search finish within a reasonable time for all 24 gyms on the official map.
 - [x] Complete the terminal visualization: show the agent, final path, frontier, visited states, and accumulated movement cost on every terrain type.
-- [ ] Add an integration test that runs the complete workflow with `mapa.txt` and validates the gym order, route cost, battle cost, total cost, final energy, and expanded-state counts.
+- [x] Add an integration test that runs the complete workflow with `mapa.txt` and validates the gym order, route cost, battle cost, total cost, final energy, and expanded-state counts.
 - [x] Make the test suite discoverable with the default `python -m unittest discover` command.
 - [ ] Run and record the final 30-run genetic-algorithm experiment after the route search is fixed.
 - [ ] Document how A* and the genetic algorithm work, the experiment results, and the limits of the optimality guarantee.
