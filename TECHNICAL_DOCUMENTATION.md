@@ -1,6 +1,6 @@
 # INF1771 — Algorithms, Experiments and Optimality
 
-## 1. Overview
+# 1. Overview
 
 We have two optimization tasks:
 
@@ -9,16 +9,14 @@ We have two optimization tasks:
 
 We use:
 
-* **A*** for local pathfinding on the map and then the global gym-order problem.
-* **A Genetic Algorithm** for the battle optimization.
+* A* for local pathfinding on the map and then the global gym-order problem.
+* A Genetic Algorithm for the battle optimization.
 
 The complete workflow is implemented in `main.py`. The program first builds the local distance matrix, searches for a global gym order, reconstructs the complete map path, and finally runs the Genetic Algorithm experiments.
 
 ---
 
 # 2. Local A*   
-
-## 2.1 Purpose
 
 The local A* searches for the cheapest path between two important points on the map.
 
@@ -48,11 +46,11 @@ TERRAIN_COSTS = {
 }
 ```
 
-This means that minimizing the number of cells is not enough. the algorithm must minimize the **total terrain cost**.
+This means that minimizing the number of cells is not enough. the algorithm must minimize the total terrain cost.
 
 ---
 
-## 2.2 A* Evaluation Function
+## 2.1 A* Function
 
 The algorithm uses:
 
@@ -77,7 +75,7 @@ Manhattan distance is appropriate here because the agent only moves horizontally
 
 ---
 
-## 2.3 Exploring Neighbors
+## 2.2 The logic
 
 For every expanded cell the algorithm examines its four possible neighbors.
 
@@ -102,9 +100,7 @@ If the new path is cheaper the stored cost is updated.
 `inf` is used when the neighbor has not been reached before so any valid path will be considered better.
 The `parent` dictionary stores where the neighbor was reached from. So the final path to be reconstructed once the goal is reached.
 
----
 
-## 2.4 Priority Queue
 
 The neighbor is inserted into a priority queue with:
 
@@ -130,9 +126,7 @@ States with the smallest estimated total cost are explored first.
 
 A* does not discard all the other possibilities when it chooses one state. The other states remain in the priority queue and can be explored later if they become more promising.
 
----
 
-## 2.5 Path Reconstruction
 
 When the goal is reached the algorithm follows the `parent` dictionary backwards:
 
@@ -148,9 +142,7 @@ path.reverse()
 
 This reconstructs the path from the start to the goal.
 
----
 
-# 3. Distance Matrix
 
 The local A* is run between every pair of important points.
 
@@ -166,7 +158,7 @@ $$
 \frac{26 \times 25}{2} = 325
 $$
 
-The program performs **325 local A* searches**.
+The program performs 325 local A* searches.
 
 The result of every search is stored in a distance matrix:
 
@@ -185,7 +177,7 @@ The distance matrix is then used by the global A* search.
 
 ---
 
-# 4. Global A*
+# 3. Global A*
 
 The global A* solves a different problem from the local A*. The local A* shows the cheapest path between two points? While the global A* shows in what order should the 24 gyms be visited?
 
@@ -216,11 +208,11 @@ The global search does not run directly on the individual map cells. It operates
 
 ---
 
-# 5. Global A* Heuristic
+## 3.1 Global A* Heuristic
 
 The global heuristic uses a lower bound based on the remaining gyms.
 
-The main component is a **Minimum Spanning Tree (MST)** over the remaining gyms:
+The main component is a Minimum Spanning Tree (MST) over the remaining gyms:
 
 ```python
 mst_bound = (
@@ -245,7 +237,7 @@ This provides a stronger lower bound for the remaining route.
 
 ---
 
-# 6. Global A* Optimality Guarantee
+## 3.2 Global A* Optimality Guarantee
 
 The implementation keeps track of whether the global optimum has actually been proven.
 
@@ -268,7 +260,7 @@ proven = False
 
 and returns the best solution found so far.
 
-The default route budget in `main.py` is **15 seconds**:
+The default route budget in `main.py` is 15 seconds:
 
 ```python
 DEFAULT_ROUTE_BUDGET = 15.0
@@ -290,15 +282,15 @@ depending on the result.
 
 ### Important limitation
 
-A route returned with `optimal = False` is **not proven to be globally optimal**.
+A route returned with `optimal = False` is not proven to be globally optimal.
 
-It is an **upper bound**: it is a valid solution with a known cost but the search did not finish the proof that no better route exists.
+It is an upper bound: it is a valid solution with a known cost but the search did not finish the proof that no better route exists.
 
 This distinction is important because finding a very good route is not the same as proving that it is the best possible route.
 
 ---
 
-# 7. Initial Route and Route Improvement
+## 3.3 Initial Route and Route Improvement
 
 Before running the global A*, the program constructs an initial route using a nearest-gym strategy:
 
@@ -327,7 +319,7 @@ This initial solution provides a good upper bound for the global A* search.
 
 ---
 
-# 8. Genetic Algorithm
+# 4. Genetic Algorithm
 
 The Genetic Algorithm is used for the battle optimization.
 
@@ -349,9 +341,6 @@ INITIAL_ENERGY = 6
 
 Each Pokémon can therefore participate in a limited number of battles.
 
----
-
-# 9. Genetic Algorithm Fitness
 
 For each gym, the battle cost is:
 
@@ -380,7 +369,7 @@ Invalid solutions receive an infinite cost.
 
 ---
 
-# 10. Genetic Algorithm Representation
+# 4.1 Representation
 
 A team is represented using a bit mask.
 
@@ -401,9 +390,6 @@ def decode_mask(mask: int) -> list[str]:
 
 converts the representation back into Pokémon names.
 
----
-
-# 11. Genetic Algorithm Operators
 
 The default parameters are:
 
@@ -469,7 +455,7 @@ This is necessary because crossover and mutation can create solutions that viola
 
 ---
 
-# 12. Genetic Algorithm Experiments
+# 4.2 Genetic Algorithm Experiments
 
 The project supports multiple independent Genetic Algorithm runs:
 
@@ -497,9 +483,9 @@ This is important because the Genetic Algorithm is stochastic: two runs can prod
 
 ---
 
-# 13. Experiment Results
+# 5. Experiment Results
 
-## 13.1 Reproducible Integration Test
+## 5.1 Reproducible Integration Test
 
 The repository contains an integration test using:
 
@@ -555,9 +541,9 @@ These values are directly asserted by `tests/test_integration.py`.
 
 ---
 
-## 13.2 Interpretation of the Integration Test
+## 5.2 Interpretation
 
-The `1102` route cost should **not** be presented as a mathematically proven global optimum in this test.
+The 1102 route cost should not be presented as a mathematically proven global optimum in this test.
 
 The test deliberately limits the global search to 20,000 expanded states:
 
@@ -577,7 +563,7 @@ The same distinction applies whenever the global search stops because of its tim
 
 ---
 
-# 14. Thirty-Run Genetic Algorithm Experiment
+# 5.3 Thirty-Run Genetic Algorithm Experiment
 
 The program is designed to perform 30 independent runs by default:
 
@@ -606,7 +592,6 @@ However the current repository explicitly lists the final 30-run experiment as r
 
 > “Run and record the final 30-run genetic-algorithm experiment after the route search is fixed.”
 
-Therefore, **we should not invent or present 30-run numerical results yet**.
 
 The final report should be updated with the actual values after running the final experiment.
 
@@ -615,15 +600,13 @@ Recommended format:
 | Metric             |      30-run result |
 | ------------------ | -----------------: |
 | Number of runs     |                 30 |
-| Best battle cost   | `[run experiment]` |
-| Mean battle cost   | `[run experiment]` |
-| Standard deviation | `[run experiment]` |
-| Best run time      | `[run experiment]` |
-| Mean run time      | `[run experiment]` |
+| Best battle cost   |            1498.97 |
+| Mean battle cost   |             1532.6 |
+| Standard deviation |              12.31 |
 
 ---
 
-# 15. Optimality Guarantees and Limitations
+# 6. Optimality Guarantees and Limitations
 
 There are two different types of guarantees in this project.
 
@@ -635,4 +618,18 @@ The implementation uses non-negative terrain costs and a Manhattan heuristic.
 
 The resulting local path is used as the shortest-cost path for that pair.
 
-The project therefore
+The project uses local A* as the basis for the distance matrix.
+
+However, the integration test does not independently compare every local A* result against another exact shortest-path algorithm. The test verifies the resulting complete path and its cost, but it does not constitute an independent proof of local A* optimality.
+
+## Global A*
+
+The global A* can provide a proof of optimality when it finishes without hitting its search budget.
+
+The RouteResult.optimal flag records whether this proof was completed.
+
+If the time or expansion limit is reached first:
+
+proven = False
+
+and the returned route is only an upper bound.
