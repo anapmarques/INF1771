@@ -22,9 +22,9 @@ The local A* searches for the cheapest path between two important points on the 
 
 There are 26 important points:
 
-* 1 starting point;
-* 24 gyms;
-* 1 final destination.
+* 1 starting point
+* 24 gyms
+* 1 final destination
 
 The agent can move in four directions:
 
@@ -77,17 +77,13 @@ Manhattan distance is appropriate here because the agent only moves horizontally
 
 ## 2.2 The logic
 
-For every expanded cell the algorithm examines its four possible neighbors.
-
-The cost of reaching a neighbor is calculated as:
+For every expanded cell the algorithm examines its four possible neighbors. The cost of reaching a neighbor is calculated as:
 
 ```python
 new_cost = cost + get_cell_cost(grid[row][col])
 ```
 
-`new_cost` is the total cost of the path found so far to reach this neighbor.
-
-The algorithm then compares this value with the best cost currently stored for that cell:
+`new_cost` is the total cost of the path found so far to reach this neighbor. The algorithm then compares this value with the best cost currently stored for that cell:
 
 ```python
 if new_cost < costs.get(neighbor, inf):
@@ -96,7 +92,6 @@ if new_cost < costs.get(neighbor, inf):
 ```
 
 If the new path is cheaper the stored cost is updated.
-
 `inf` is used when the neighbor has not been reached before so any valid path will be considered better.
 The `parent` dictionary stores where the neighbor was reached from. So the final path to be reconstructed once the goal is reached.
 
@@ -123,10 +118,7 @@ f(n) = g(n) + h(n)
 $$
 
 States with the smallest estimated total cost are explored first.
-
 A* does not discard all the other possibilities when it chooses one state. The other states remain in the priority queue and can be explored later if they become more promising.
-
-
 
 When the goal is reached the algorithm follows the `parent` dictionary backwards:
 
@@ -140,11 +132,7 @@ while current != start:
 path.reverse()
 ```
 
-This reconstructs the path from the start to the goal.
-
-
-
-The local A* is run between every pair of important points.
+This reconstructs the path from the start to the goal. The local A* is run between every pair of important points.
 
 The implementation calculates:
 
@@ -159,7 +147,6 @@ $$
 $$
 
 The program performs 325 local A* searches.
-
 The result of every search is stored in a distance matrix:
 
 ```python
@@ -222,10 +209,7 @@ mst_bound = (
 )
 ```
 
-This represents:
-- the cost to reach one of the remaining gyms
-- a lower bound for connecting the remaining gyms;
-- the cost to reach the final destination from one of them.
+This represents the cost to reach one of the remaining gyms. It also represents a lower bound for connecting the remaining gyms and the cost to reach the final destination from one of them.
 
 The implementation also computes a degree-based lower bound and takes the maximum of the two:
 
@@ -282,11 +266,7 @@ depending on the result.
 
 ### Important limitation
 
-A route returned with `optimal = False` is not proven to be globally optimal.
-
-It is an upper bound: it is a valid solution with a known cost but the search did not finish the proof that no better route exists.
-
-This distinction is important because finding a very good route is not the same as proving that it is the best possible route.
+A route returned with optimal = False is not proven to be globally optimal. It is an upper bound so it is a valid solution with a known cost but the search did not finish the proof that no better route exists. This distinction is important because finding a very good route is not the same as proving that it is the best possible route.
 
 ---
 
@@ -323,9 +303,9 @@ This initial solution provides a good upper bound for the global A* search.
 
 The Genetic Algorithm is used for the battle optimization.
 
-Each individual represents a complete assignment of Pokémon teams to the 24 gyms.
+Each individual represents a complete assignment of Pokemon teams to the 24 gyms.
 
-The available Pokémon and their powers are defined in `StaticValues.py`:
+The available Pokemon and their powers are defined in `StaticValues.py`:
 
 ```python
 POKEMON_POWER = {
@@ -339,9 +319,7 @@ POKEMON_POWER = {
 INITIAL_ENERGY = 6
 ```
 
-Each Pokémon can therefore participate in a limited number of battles.
-
-
+Each Pokemon can therefore participate in a limited number of battles.
 For each gym, the battle cost is:
 
 ```python
@@ -352,7 +330,6 @@ total_cost += (
 ```
 
 A stronger team therefore reduces the battle time.
-
 After a Pokémon participates in a battle, its energy is reduced:
 
 ```python
@@ -364,18 +341,13 @@ A solution is invalid if:
 - a gym has no Pokémon selected;
 - a Pokémon with no remaining energy is selected;
 - all Pokémon have exhausted their energy by the end.
-
 Invalid solutions receive an infinite cost.
 
 ---
 
 # 4.1 Representation
 
-A team is represented using a bit mask.
-
-For example, each bit corresponds to one Pokémon.
-
-This allows a team containing multiple Pokémon to be represented by a single integer.
+A team is represented using a bit mask. For example, each bit corresponds to one Pokémon. This allows a team containing multiple Pokémon to be represented by a single integer.
 
 The function:
 
@@ -410,9 +382,7 @@ population = [
 
 ### Selection
 
-The implementation uses tournament selection.
-
-Three candidates are sampled:
+The implementation uses tournament selection. Three candidates are sampled:
 
 ```python
 candidates = rng.sample(population, 3)
@@ -449,9 +419,7 @@ Mutation changes one Pokémon selection and introduces variation into the popula
 
 ### Repair
 
-After generating a candidate `repair_solution()` is used to restore valid energy usage.
-
-This is necessary because crossover and mutation can create solutions that violate the Pokémon energy constraints.
+After generating a candidate `repair_solution()` is used to restore valid energy usage. This is necessary because crossover and mutation can create solutions that violate the Pokémon energy constraints.
 
 ---
 
@@ -469,9 +437,7 @@ Each run uses a different seed:
 run_seed = seed + offset
 ```
 
-The program records the result and execution time of each run.
-
-It then calculates:
+The program records the result and execution time of each run. It then calculates:
 
 ```python
 best
@@ -479,7 +445,7 @@ mean_cost
 stdev_cost
 ```
 
-This is important because the Genetic Algorithm is stochastic: two runs can produce different solutions.
+This is important because the Genetic Algorithm is stochastic. Two runs can produce different solutions.
 
 ---
 
@@ -512,7 +478,7 @@ The expected battle cost for the seed-0 GA run is:
 1528.336470292992
 ```
 
-Therefore, the expected combined cost is:
+The expected combined cost is:
 
 ```text
 2630.336470292992
@@ -543,9 +509,7 @@ These values are directly asserted by `tests/test_integration.py`.
 
 ## 5.2 Interpretation
 
-The 1102 route cost should not be presented as a mathematically proven global optimum in this test.
-
-The test deliberately limits the global search to 20,000 expanded states:
+The 1102 route cost should not be presented as a mathematically proven global optimum in this test. The test deliberately limits the global search to 20,000 expanded states:
 
 ```python
 route = find_global_route(distances, max_expanded=20_000)
@@ -557,9 +521,7 @@ and explicitly checks:
 self.assertFalse(route.optimal)
 ```
 
-This result is a valid route found under the search limit but its global optimality is not proven.
-
-The same distinction applies whenever the global search stops because of its time or state budget.
+This result is a valid route found under the search limit but its global optimality is not proven. The same distinction applies whenever the global search stops because of its time or state budget.
 
 ---
 
@@ -579,23 +541,7 @@ uses:
 
 by default.
 
-For these runs, the program reports:
-
-```text
-Number of runs
-Best result
-Mean
-Standard deviation
-```
-
-However the current repository explicitly lists the final 30-run experiment as remaining work:
-
-> “Run and record the final 30-run genetic-algorithm experiment after the route search is fixed.”
-
-
-The final report should be updated with the actual values after running the final experiment.
-
-Recommended format:
+The program reports:
 
 | Metric             |      30-run result |
 | ------------------ | -----------------: |
@@ -608,28 +554,8 @@ Recommended format:
 
 # 6. Optimality Guarantees and Limitations
 
-There are two different types of guarantees in this project.
+There are two different types of guarantees.
 
-## Local A*
+The local A* searches are performed between fixed pairs of map points. It uses non-negative terrain costs and a Manhattan heuristic. The resulting local path is used as the shortest-cost path for that pair. We uses local A* as the basis for the distance matrix. The test does not independently compare every local A* result against another exact shortest-path algorithm. It verifies the resulting complete path and its cost. But it does not constitute an independent proof of local A* optimality.
 
-The local A* searches are performed between fixed pairs of map points.
-
-The implementation uses non-negative terrain costs and a Manhattan heuristic.
-
-The resulting local path is used as the shortest-cost path for that pair.
-
-The project uses local A* as the basis for the distance matrix.
-
-However, the integration test does not independently compare every local A* result against another exact shortest-path algorithm. The test verifies the resulting complete path and its cost, but it does not constitute an independent proof of local A* optimality.
-
-## Global A*
-
-The global A* can provide a proof of optimality when it finishes without hitting its search budget.
-
-The RouteResult.optimal flag records whether this proof was completed.
-
-If the time or expansion limit is reached first:
-
-proven = False
-
-and the returned route is only an upper bound.
+The global A* can provide a proof of optimality when it finishes without hitting its search budget. RouteResult.optimal flag records whether this proof was completed. If the time or expansion limit is reached first: proven = False. And the returned route is only an upper bound.
